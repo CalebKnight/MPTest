@@ -270,7 +270,7 @@ def GetBarcode(path):
     text = sorted(text, key=lambda x: x[1] + x[3])
 
     # We will never detect all text so we just make sure there is atleast 5 contours
-    if len(text) < 5:
+    if len(text) < 2:
         return None, None, None, None, None
 
     # The first text and last text are the top and bottom numbers, this is sensitive to noise
@@ -305,7 +305,12 @@ def GetBarcode(path):
     warped = PerformTransformWithRectPoints(finalRect, original)[0]
 
     if warped.shape[0] > warped.shape[1]:
-        warped = cv2.rotate(warped, cv2.ROTATE_90_COUNTERCLOCKWISE)
+        # MARKER, THIS HAS CHANGED FROM MY SUBMISSION, IF I FORGET TO MENTION IT :)
+        # Before it would just rotate counter clockwise all the time, now it checks which side is longer and rotates accordingly
+        if max(left, right, key=lambda x: len(x)) == left:
+            warped = cv2.rotate(warped, cv2.ROTATE_90_COUNTERCLOCKWISE)
+        else:
+            warped = cv2.rotate(warped, cv2.ROTATE_90_CLOCKWISE)
         print("Rotating extracted barcode image")
 
     return topLPoint, topRPoint, botLPoint, botRPoint, warped
